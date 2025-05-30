@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OASIS BARBERSHOP - 图片展示平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'BankGothic Lt BT', 'Arial Narrow', Arial, sans-serif;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(40, 40, 40, 0.2) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(40, 40, 40, 0.2) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0 30px;
+            margin-bottom: 40px;
+            position: relative;
+            border-bottom: 1px solid #333;
+        }
+        
+        .title-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
+        
+        h1 {
+            font-size: 4.5rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            margin-bottom: 10px;
+        }
+        
+        .title-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 6rem;
+            opacity: 0.03;
+            z-index: 1;
+            letter-spacing: 15px;
+            white-space: nowrap;
+        }
+        
+        .subtitle {
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        
+        .contact-info {
+            font-size: 0.9rem;
+            color: #777;
+            line-height: 1.6;
+            letter-spacing: 1px;
+            margin-top: 15px;
+        }
+        
+        .admin-section {
+            background: rgba(15, 15, 15, 0.95);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+            border: 1px solid #333;
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .admin-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        
+        .admin-title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 2px;
+            background: #fff;
+            margin: 12px auto 0;
+        }
+        
+        .upload-area {
+            border: 2px dashed #333;
+            border-radius: 8px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(10, 10, 10, 0.7);
+        }
+        
+        .upload-area:hover {
+            border-color: #fff;
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            color: #555;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+        
+        .upload-area:hover .upload-icon {
+            color: #aaa;
+        }
+        
+        .upload-text {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+        
+        .upload-area:hover .upload-text {
+            color: #ccc;
+        }
+        
+        .upload-hint {
+            color: #555;
+            font-size: 0.9rem;
+            max-width: 600px;
+            margin: 0 auto;
+            letter-spacing: 0.5px;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            aspect-ratio: 4/3;
+            border: 1px solid #333;
+            background: #0a0a0a;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            border-color: #fff;
+        }
+        
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .gallery-item:hover .gallery-img {
+            transform: scale(1.05);
+        }
+        
+        .image-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 20px 15px 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .gallery-item:hover .image-info {
+            opacity: 1;
+        }
+        
+        .image-title {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        
+        .image-size {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        
+        .download-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #555;
+        }
+        
+        .gallery-item:hover .download-btn {
+            opacity: 1;
+        }
+        
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .modal-img {
+            max-width: 100%;
+            max-height: 80vh;
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #333;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 1001;
+            opacity: 0.7;
+        }
+        
+        .close-modal:hover {
+            opacity: 1;
+        }
+        
+        .image-details {
+            text-align: center;
+            padding: 20px;
+            max-width: 800px;
+            margin: 10px auto 0;
+            color: #ddd;
+        }
+        
+        .image-details h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        
+        .image-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 15px 0;
+            color: #999;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+        
+        .image-stats span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #555;
+            border-top: 1px solid #333;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .login-section {
+            background: rgba(15, 15, 15, 0.95);
+            border-radius: 8px;
+            padding: 30px;
+            margin: 0 auto 40px;
+            max-width: 500px;
+            border: 1px solid #333;
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        
+        .login-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 2px;
+            background: #fff;
+            margin: 12px auto 0;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group label {
+            color: #aaa;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .form-group input {
+            padding: 12px 15px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            color: #fff;
+            font-size: 1rem;
+            transition: border 0.3s;
+            font-family: 'BankGothic Lt BT', 'Arial Narrow', Arial, sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #fff;
+        }
+        
+        .login-btn {
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: 'BankGothic Lt BT', 'Arial Narrow', Arial, sans-serif;
+        }
+        
+        .login-btn:hover {
+            background: #111;
+            border-color: #fff;
+        }
+        
+        .admin-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(15, 15, 15, 0.95);
+            border-radius: 4px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+        }
+        
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #555;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'BankGothic Lt BT', 'Arial Narrow', Arial, sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        .logout-btn:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            background: rgba(20, 20, 20, 0.95);
+            border-left: 3px solid #555;
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            z-index: 2000;
+            max-width: 350px;
+            border: 1px solid #333;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            border-left-color: #777;
+        }
+        
+        .notification.success {
+            border-left-color: #aaa;
+        }
+        
+        .loader {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 3px solid #333;
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .empty-gallery {
+            text-align: center;
+            padding: 50px;
+            background: rgba(15, 15, 15, 0.7);
+            border-radius: 8px;
+            border: 1px dashed #333;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3.5rem;
+            }
+            
+            .title-bg {
+                font-size: 4.5rem;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2.5rem;
+                letter-spacing: 3px;
+            }
+            
+            .title-bg {
+                font-size: 3rem;
+                letter-spacing: 8px;
+            }
+            
+            .subtitle {
+                font-size: 1.4rem;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-text {
+                font-size: 1.2rem;
+            }
+            
+            .login-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-container">
+                <h1>OASIS BARBERSHOP</h1>
+                <div class="title-bg">OASIS BARBERSHOP</div>
+            </div>
+            <div class="subtitle">The Oasis in desert</div>
+            <div class="contact-info">
+                作者：Hhovi<br>
+                联系电话：15750789113<br>
+                VX：abaqaq5577zmr
+            </div>
+        </header>
+        
+        <div id="adminBar" class="admin-bar" style="display: none;">
+            <div class="admin-info">
+                <i class="fas fa-user-shield"></i>
+                <span>管理员已登录</span>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> 退出登录
+            </button>
+        </div>
+        
+        <section id="loginSection" class="login-section">
+            <h2 class="login-title">管理员登录</h2>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" placeholder="输入管理员用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" placeholder="输入管理员密码" required>
+                </div>
+                <button type="submit" class="login-btn">登录管理面板</button>
+            </form>
+        </section>
+        
+        <section id="adminSection" class="admin-section">
+            <h2 class="admin-title">上传图片</h2>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-file-upload upload-icon"></i>
+                <p class="upload-text">点击或拖拽文件到此处上传</p>
+                <p class="upload-hint">支持 JPG, PNG, GIF 格式，最大文件 10MB</p>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+            <div class="loader" id="loader"></div>
+        </section>
+        
+        <div class="gallery" id="gallery">
+            <!-- 初始为空画廊 -->
+            <div class="empty-gallery">
+                <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 20px; color: #555;"></i>
+                <p>画廊为空，请上传图片</p>
+            </div>
+        </div>
+        
+        <div class="modal" id="imageModal">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div class="modal-content">
+                <img src="" alt="图片预览" class="modal-img" id="modalImage">
+                <div class="image-details">
+                    <h3 id="modalTitle">图片标题</h3>
+                    <div class="image-stats">
+                        <span><i class="fas fa-file-image"></i> <span id="modalType">JPEG</span></span>
+                        <span><i class="fas fa-weight-hanging"></i> <span id="modalSize">5.2 MB</span></span>
+                        <span><i class="fas fa-ruler-combined"></i> <span id="modalDimensions">1920x1080</span></span>
+                        <span><i class="fas fa-calendar"></i> <span id="modalDate">2023年10月15日</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="notification" id="notification">
+            <i class="fas fa-info-circle"></i> <span id="notificationText">这是一条通知消息</span>
+        </div>
+        
+        <footer class="footer">
+            <p>© 2023 OASIS BARBERSHOP | 图片展示平台 | 最大上传限制: 10MB</p>
+        </footer>
+    </div>
+
+    <script>
+        // 图片数据（初始为空）
+        let galleryData = [];
+        
+        // 获取DOM元素
+        const gallery = document.getElementById('gallery');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const loader = document.getElementById('loader');
+        const imageModal = document.getElementById('imageModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalType = document.getElementById('modalType');
+        const modalSize = document.getElementById('modalSize');
+        const modalDimensions = document.getElementById('modalDimensions');
+        const modalDate = document.getElementById('modalDate');
+        const loginSection = document.getElementById('loginSection');
+        const adminSection = document.getElementById('adminSection');
+        const adminBar = document.getElementById('adminBar');
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            notificationText.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add(type, 'show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 初始化画廊
+        function initGallery() {
+            gallery.innerHTML = '';
+            
+            if (galleryData.length === 0) {
+                gallery.innerHTML = `
+                    <div class="empty-gallery">
+                        <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 20px; color: #555;"></i>
+                        <p>画廊为空，请上传图片</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            galleryData.forEach(item => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.innerHTML = `
+                    <img src="${item.src}" alt="${item.title}" class="gallery-img">
+                    <div class="image-info">
+                        <h3 class="image-title">${item.title}</h3>
+                        <p class="image-size">${item.size} · ${item.dimensions}</p>
+                    </div>
+                    <button class="download-btn" data-id="${item.id}">
+                        <i class="fas fa-download"></i>
+                    </button>
+                `;
+                
+                galleryItem.addEventListener('click', () => {
+                    openModal(item);
+                });
+                
+                const downloadBtn = galleryItem.querySelector('.download-btn');
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadImage(item);
+                });
+                
+                gallery.appendChild(galleryItem);
+            });
+        }
+        
+        // 打开模态框显示大图
+        function openModal(item) {
+            modalImage.src = item.src;
+            modalTitle.textContent = item.title;
+            modalType.textContent = item.type;
+            modalSize.textContent = item.size;
+            modalDimensions.textContent = item.dimensions;
+            modalDate.textContent = item.date;
+            imageModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭模态框
+        function closeImageModal() {
+            imageModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 下载图片
+        function downloadImage(item) {
+            showNotification(`正在下载: ${item.title}`, 'success');
+            
+            // 在实际应用中，这里应该调用真实的下载API
+            // 这里使用模拟下载
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.href = item.src;
+                link.download = item.title.replace(/\s+/g, '_') + '.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, 1000);
+        }
+        
+        // 上传文件处理
+        function handleFileUpload(file) {
+            // 检查文件类型
+            if (!file.type.match('image.*')) {
+                showNotification('错误：请上传图片文件 (JPG, PNG, GIF)', 'error');
+                return;
+            }
+            
+            // 检查文件大小 (10MB限制)
+            if (file.size > 10 * 1024 * 1024) {
+                showNotification('错误：文件大小超过10MB限制', 'error');
+                return;
+            }
+            
+            // 显示加载动画
+            loader.style.display = 'block';
+            
+            // 模拟上传过程
+            setTimeout(() => {
+                // 创建URL用于预览
+                const imageUrl = URL.createObjectURL(file);
+                
+                // 创建新的图片对象
+                const newImage = {
+                    id: galleryData.length + 1,
+                    title: file.name.replace(/\.[^/.]+$/, ""), // 移除扩展名
+                    src: imageUrl,
+                    size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                    type: file.type.split('/')[1].toUpperCase(),
+                    dimensions: '未知',
+                    date: new Date().toLocaleDateString('zh-CN', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })
+                };
+                
+                // 获取图片尺寸
+                const img = new Image();
+                img.onload = function() {
+                    newImage.dimensions = `${this.width}x${this.height}`;
+                    
+                    // 添加到画廊数据
+                    galleryData.unshift(newImage);
+                    
+                    // 重新初始化画廊
+                    initGallery();
+                    
+                    // 隐藏加载动画
+                    loader.style.display = 'none';
+                    
+                    // 提示上传成功
+                    showNotification(`图片上传成功: ${newImage.title}`, 'success');
+                };
+                img.src = imageUrl;
+            }, 2000);
+        }
+        
+        // 管理员登录
+        function adminLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // 简单验证（实际应用中应使用更安全的方式）
+            if (username === 'admin' && password === 'admin123') {
+                // 显示管理区域
+                adminSection.classList.add('active');
+                adminBar.style.display = 'flex';
+                loginSection.style.display = 'none';
+                showNotification('管理员登录成功', 'success');
+            } else {
+                showNotification('错误：用户名或密码不正确', 'error');
+            }
+        }
+        
+        // 管理员登出
+        function adminLogout() {
+            adminSection.classList.remove('active');
+            adminBar.style.display = 'none';
+            loginSection.style.display = 'block';
+            showNotification('您已退出管理员账户', 'info');
+            loginForm.reset();
+        }
+        
+        // 事件监听器
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+                // 重置input，允许再次上传相同文件
+                fileInput.value = '';
+            }
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#fff';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#333';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#333';
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        closeModal.addEventListener('click', closeImageModal);
+        
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                closeImageModal();
+            }
+        });
+        
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            adminLogin();
+        });
+        
+        logoutBtn.addEventListener('click', adminLogout);
+        
+        // 初始化画廊（初始为空）
+        initGallery();
+    </script>
+</body>
+</html>
